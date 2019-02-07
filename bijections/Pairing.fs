@@ -1,15 +1,22 @@
 ﻿namespace Pairing
 
+module Nat64 = begin
+    type Nat = uint64
+    let inline nat(x:^a) : Nat = uint64(x)
+end
+
+open Nat64
+
 module NTuples = begin
 
-    // uint64 list -> uint64
-    let rec combine (pair: (uint64 * uint64) -> uint64) = function
-        | [] -> 0UL
+    // nat list -> nat
+    let rec combine (pair: (Nat * Nat) -> Nat) = function  
+        | [] -> nat(0)
         | x::[] -> x
         | x::[y] -> pair(y, x)
         | x::rest -> pair(combine pair rest, x)
 
-    // int -> uint64 -> uint64 list
+    // int -> Nat -> Nat list
     let rec split unpair size n =
         match size with
         | 0 -> []
@@ -27,13 +34,13 @@ module Cantor = begin
 
     open System
 
-    // (uint64 * uint64) -> uint64
-    let pair(k1:uint64, k2:uint64) : uint64 = 
+    // (Nat * Nat) -> Nat
+    let pair(k1:Nat, k2:Nat) : Nat = 
         ((k1 + k2) * (k1 + k2 + 1UL)) / 2UL + k2
 
-    // uint64 -> (uint64 * uint64)
-    let unpair(z:uint64) = 
-        let w = uint64(Math.Floor((Math.Sqrt(8.0 * double(z) + 1.0) - 1.0) / 2.0))
+    // Nat -> (Nat * Nat)
+    let unpair(z:Nat) = 
+        let w = nat(Math.Floor((Math.Sqrt(8.0 * double(z) + 1.0) - 1.0) / 2.0))
         let t = (w * w + w) / 2UL
         let y = z - t
         let x = w - y
@@ -50,14 +57,14 @@ module Elegant = begin
 
     open System
 
-    let pair(x:uint64, y:uint64) = 
+    let pair(x:Nat, y:Nat) = 
         if max x y <> x then y * y + x
         else (x * x) + x + y
 
-    let unpair(z:uint64) = 
+    let unpair(z:Nat) = 
         let z = double(z)
-        let r = uint64(Math.Floor(Math.Sqrt(z)))
-        let rl = uint64(z) - (r * r)
+        let r = nat(Math.Floor(Math.Sqrt(z)))
+        let rl = nat(z) - (r * r)
         if rl < r then (rl, r)
         else (r, rl - r)
 
@@ -75,8 +82,8 @@ end
 
 module BoundedPair = begin
 
-    let pairMax (maxX:uint64) (x:uint64, y:uint64) = (y * maxX) + x
-    let unpairMax (maxX:uint64) (n:uint64) = 
+    let pairMax (maxX:Nat) (x:Nat, y:Nat) = (y * maxX) + x
+    let unpairMax (maxX:Nat) (n:Nat) = 
         let x = n % maxX
         let y = n / maxX
         (x, y)
@@ -87,7 +94,19 @@ module BoundedPair = begin
         let e2 = e1 |> List.map (pairMax 5UL)
         let works = (e2 = source)    
     end
-    
 
 end
 
+module Patterns = begin
+
+    let (|CantorPair|) = Cantor.unpair
+
+    let (|CantorList|) length = Cantor.toList length
+    
+    let (|ElegantPair|) = Elegant.unpair
+
+    let (|ElegantList|) length = Cantor.toList length
+
+    let (|BoundedPair|) = BoundedPair.unpairMax
+
+end
