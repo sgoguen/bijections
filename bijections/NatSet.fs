@@ -3,7 +3,9 @@ module NatSet
 open Pairing
 open System
 
-type Cardinality = Finite of uint64 | Infinite
+type Cardinality = 
+    | Finite of uint64 
+    | Infinite
 
 let getMaxSize = function 
     | Finite(n) -> n

@@ -80,6 +80,29 @@ module Elegant = begin
 
 end
 
+module RosenbergStrong = begin
+    open System
+    open Nat64
+
+    let pair(x:Nat, y:Nat) = 
+        let mxy = max x y
+        mxy * mxy + mxy + x - y
+
+    let unpair(z:Nat) =
+        let m = nat(Math.Floor(Math.Sqrt(double(z))))
+        let ml = z - (m * m)
+        if ml < m then (ml, m)
+        else (m, (m * m) + m + m - z)
+end
+
+module RosenbergStrongTests = begin
+    open RosenbergStrong
+    let source = [0UL..1000UL]
+    let e1 = source |> List.map unpair
+    let e2 = e1 |> List.map pair
+    let works = (e2 = source)    
+end
+
 module BoundedPair = begin
 
     let pairMax (maxX:Nat) (x:Nat, y:Nat) = (y * maxX) + x
@@ -96,6 +119,56 @@ module BoundedPair = begin
     end
 
 end
+
+module SzudzikPTupling = begin
+
+    open System
+
+    let unpair a b z =
+        let a = double(a)
+        let b = double(b)
+        let z = double(z)
+        let m = Math.Floor(Math.Pow(double(z), 1.0 / (a + b)))
+        let m1b = Math.Pow(m + 1.0, b)
+        let ma = Math.Pow(m, a)
+        if z < ma * m1b then 
+            (z % a, Math.Floor(z / ma))
+        else 
+            (Math.Floor(z / m1b), z % m1b)
+
+    let (|Int|) (f:double) = int(f)
+
+    let rec ntuple n (z:int) =
+        [
+            if n = 1 then 
+                yield z
+            if n = 2 then 
+                let (Int(x1), Int(x2)) = unpair 1 1 z
+                yield x1
+                yield x2
+            elif n > 2 then 
+                let (Int(x1), Int(x2)) = unpair (n - 1) 1 z
+                yield! tuple (n - 1) (int x1)
+                yield x2
+        ]
+
+    // let maxL xs = List.fold max 0 xs 
+    // let invert = List.map (fun x -> double(x))
+
+    // let calcLength tsize m =
+    //     seq { 0..1000000 } |> Seq.map (ntuple tsize) |> Seq.takeWhile (fun l -> maxL l <= m)
+    //     |> Seq.filter (fun l -> maxL l = m)
+    //     |> Seq.length
+
+    // [0..7] |> List.map (calcLength 6)
+
+    // |> Seq.iter(printfn "%A")
+    
+
+    
+
+end
+
 
 module Patterns = begin
 
